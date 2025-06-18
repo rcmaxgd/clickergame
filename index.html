@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Clicker Spel met Upgrades</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #f2f2f2;
+      position: relative;
+      flex-direction: column;
+    }
+
+    .click-counter {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: #333;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 12px;
+      font-size: 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    .click-button {
+      padding: 30px 60px;
+      font-size: 24px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      transition: transform 0.1s ease;
+      margin-bottom: 20px;
+    }
+
+    .click-button:active {
+      transform: scale(0.95);
+    }
+
+    .upgrades {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .upgrade-button {
+      padding: 15px 30px;
+      font-size: 18px;
+      background-color: #2196F3;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      transition: background-color 0.3s ease;
+    }
+
+    .upgrade-button:disabled {
+      background-color: #aaa;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="click-counter" id="counter">Clicks: 0</div>
+
+  <button class="click-button" id="clickBtn">Klik mij!</button>
+
+  <div class="upgrades">
+    <button class="upgrade-button" id="clickPowerBtn">Upgrade Klikkracht (100)</button>
+    <button class="upgrade-button" id="autoClickerBtn">Koop Auto Clicker (200)</button>
+  </div>
+
+  <script>
+    let clicks = 0;
+    let clickPower = 1;
+
+    let clickPowerCost = 100;
+    let autoClickerCost = 200;
+    let autoClickers = 0;
+
+    const counter = document.getElementById('counter');
+    const clickBtn = document.getElementById('clickBtn');
+    const clickPowerBtn = document.getElementById('clickPowerBtn');
+    const autoClickerBtn = document.getElementById('autoClickerBtn');
+
+    function updateUI() {
+      counter.textContent = `Clicks: ${clicks}`;
+      clickPowerBtn.textContent = `Upgrade Klikkracht (${clickPowerCost})`;
+      autoClickerBtn.textContent = `Koop Auto Clicker (${autoClickerCost})`;
+
+      clickPowerBtn.disabled = clicks < clickPowerCost;
+      autoClickerBtn.disabled = clicks < autoClickerCost;
+    }
+
+    clickBtn.addEventListener('click', () => {
+      clicks += clickPower;
+      updateUI();
+    });
+
+    clickPowerBtn.addEventListener('click', () => {
+      if (clicks >= clickPowerCost) {
+        clicks -= clickPowerCost;
+        clickPower *= 2;
+        clickPowerCost *= 2;
+        updateUI();
+      }
+    });
+
+    autoClickerBtn.addEventListener('click', () => {
+      if (clicks >= autoClickerCost) {
+        clicks -= autoClickerCost;
+        autoClickers++;
+        autoClickerCost *= 2;
+        updateUI();
+      }
+    });
+
+    // Auto clicker interval
+    setInterval(() => {
+      if (autoClickers > 0) {
+        clicks += autoClickers;
+        updateUI();
+      }
+    }, 1000);
+
+    updateUI(); // initial UI
+  </script>
+
+</body>
+</html>

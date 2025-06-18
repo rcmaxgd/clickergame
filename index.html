@@ -3,18 +3,34 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Clicker Spel met Upgrades</title>
+  <title>Clicker Spel Uitgebreid</title>
   <style>
     body {
       margin: 0;
       font-family: Arial, sans-serif;
       height: 100vh;
       display: flex;
-      justify-content: center;
-      align-items: center;
       background-color: #f2f2f2;
       position: relative;
+    }
+
+    .sidebar {
+      width: 240px;
+      background-color: #ddd;
+      padding: 20px;
+      box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+      display: flex;
       flex-direction: column;
+      gap: 15px;
+    }
+
+    .main-area {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      position: relative;
     }
 
     .click-counter {
@@ -29,38 +45,46 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.2);
     }
 
-    .click-button {
-      padding: 30px 60px;
-      font-size: 24px;
-      background-color: #4CAF50;
+    .reset-button {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: red;
       color: white;
       border: none;
-      border-radius: 20px;
+      border-radius: 10px;
       cursor: pointer;
+      display: none;
+    }
+
+    .click-button {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      font-size: 22px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
       box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      cursor: pointer;
       transition: transform 0.1s ease;
-      margin-bottom: 20px;
     }
 
     .click-button:active {
       transform: scale(0.95);
     }
 
-    .upgrades {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
     .upgrade-button {
-      padding: 15px 30px;
-      font-size: 18px;
+      padding: 12px 20px;
+      font-size: 16px;
       background-color: #2196F3;
       color: white;
       border: none;
-      border-radius: 12px;
+      border-radius: 8px;
       cursor: pointer;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
       transition: background-color 0.3s ease;
     }
 
@@ -72,35 +96,51 @@
 </head>
 <body>
 
-  <div class="click-counter" id="counter">Clicks: 0</div>
-
-  <button class="click-button" id="clickBtn">Klik mij!</button>
-
-  <div class="upgrades">
+  <div class="sidebar">
     <button class="upgrade-button" id="clickPowerBtn">Upgrade Klikkracht (100)</button>
     <button class="upgrade-button" id="autoClickerBtn">Koop Auto Clicker (200)</button>
+    <button class="upgrade-button" id="click10xBtn">10x Klikkracht (10.000)</button>
+    <button class="upgrade-button" id="auto10xBtn">10x Auto Clicker (10.000)</button>
+  </div>
+
+  <div class="main-area">
+    <button class="reset-button" id="resetBtn">🔁 Reset voortgang</button>
+    <div class="click-counter" id="counter">Clicks: 0</div>
+    <button class="click-button" id="clickBtn">Klik!</button>
   </div>
 
   <script>
     let clicks = 0;
     let clickPower = 1;
+    let autoClickers = 0;
+    let autoClickSpeed = 1000;
 
     let clickPowerCost = 100;
     let autoClickerCost = 200;
-    let autoClickers = 0;
+    let click10xCost = 10000;
+    let auto10xCost = 10000;
 
     const counter = document.getElementById('counter');
     const clickBtn = document.getElementById('clickBtn');
     const clickPowerBtn = document.getElementById('clickPowerBtn');
     const autoClickerBtn = document.getElementById('autoClickerBtn');
+    const click10xBtn = document.getElementById('click10xBtn');
+    const auto10xBtn = document.getElementById('auto10xBtn');
+    const resetBtn = document.getElementById('resetBtn');
 
     function updateUI() {
       counter.textContent = `Clicks: ${clicks}`;
       clickPowerBtn.textContent = `Upgrade Klikkracht (${clickPowerCost})`;
       autoClickerBtn.textContent = `Koop Auto Clicker (${autoClickerCost})`;
+      click10xBtn.textContent = `10x Klikkracht (${click10xCost})`;
+      auto10xBtn.textContent = `10x Auto Clicker (${auto10xCost})`;
 
       clickPowerBtn.disabled = clicks < clickPowerCost;
       autoClickerBtn.disabled = clicks < autoClickerCost;
+      click10xBtn.disabled = clicks < click10xCost;
+      auto10xBtn.disabled = clicks < auto10xCost;
+
+      resetBtn.style.display = clicks >= 1000000 ? 'block' : 'none';
     }
 
     clickBtn.addEventListener('click', () => {
@@ -126,15 +166,53 @@
       }
     });
 
-    // Auto clicker interval
-    setInterval(() => {
-      if (autoClickers > 0) {
-        clicks += autoClickers;
+    click10xBtn.addEventListener('click', () => {
+      if (clicks >= click10xCost) {
+        clicks -= click10xCost;
+        clickPower *= 10;
+        click10xCost *= 2;
         updateUI();
       }
-    }, 1000);
+    });
 
-    updateUI(); // initial UI
+    auto10xBtn.addEventListener('click', () => {
+      if (clicks >= auto10xCost) {
+        clicks -= auto10xCost;
+        autoClickSpeed = Math.max(100, autoClickSpeed / 10); // snellere interval
+        auto10xCost *= 2;
+        setupAutoClicker(); // herstart interval
+        updateUI();
+      }
+    });
+
+    resetBtn.addEventListener('click', () => {
+      if (confirm("Weet je zeker dat je al je voortgang wilt resetten?")) {
+        clicks = 0;
+        clickPower = 1;
+        autoClickers = 0;
+        autoClickSpeed = 1000;
+        clickPowerCost = 100;
+        autoClickerCost = 200;
+        click10xCost = 10000;
+        auto10xCost = 10000;
+        setupAutoClicker();
+        updateUI();
+      }
+    });
+
+    let autoInterval;
+    function setupAutoClicker() {
+      clearInterval(autoInterval);
+      autoInterval = setInterval(() => {
+        if (autoClickers > 0) {
+          clicks += autoClickers;
+          updateUI();
+        }
+      }, autoClickSpeed);
+    }
+
+    setupAutoClicker();
+    updateUI();
   </script>
 
 </body>
